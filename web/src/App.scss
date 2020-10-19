@@ -1,0 +1,154 @@
+$warning: #ff6f00;
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+body {
+  background-color: #111;
+}
+
+.app {
+  width: 100%;
+}
+
+.calendar {
+  width: 80%;
+  margin: 0px auto;
+}
+
+.month {
+  width: 100%;
+  margin: 20px auto;
+  text-align: center;
+  color: $warning;
+  display: flex;
+  flex-direction: column;
+}
+
+.week {
+  margin: auto;
+  display: flex;
+  flex-direction: row;
+  span {
+    height: 25px;
+    width: 150px;
+  }
+}
+
+.day {
+  height: 100px;
+  width: 150px;
+  margin: 2px;
+  display: flex;
+  flex-direction: column;
+  background-color: #333;
+  color: $warning;
+  .event-wrapper{
+    display: flex;
+    flex-direction: row;
+  }
+  &.current {
+    background-color: $warning;
+    color: #222;
+  }
+}
+
+.event {
+  width: 45%;
+  height: 20px;
+  margin: 3px auto;
+  border-radius: 10px;
+  color: black;
+  background-color: #888;
+  &.selected{
+    background-color: pink;
+    outline: none;
+  }
+  &.accepted {
+    background-color: #36C7D0;
+  }
+  &.signed-up {
+    background-color: #7E8CE0;
+  }
+  &.tentative {
+    background-color: #FF893B;
+  }
+  &.declined {
+    background-color: #FFA48E;
+  }
+  &.standby {
+    background-color: #36C7D0;
+  }
+}
+
+.signups {
+  width: 70%;
+  margin: 20px auto;
+  color: $warning;
+  display: flex;
+  flex-direction: column;
+  .eventSignup {
+    margin: 5px 0px 5px 0px;
+    background-color: #222;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .eventLoc {
+    width: 15%;
+  }
+  .eventDate {
+    width: 5%;
+  }
+  .signupButtons {
+    width: 30%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    button {
+      border-radius: 10px;
+      color: black;
+      background-color: #888;
+    }
+  }
+  textarea {
+    width: 50%;
+    height: 15px;
+  }
+}
