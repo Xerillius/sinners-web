@@ -16,7 +16,7 @@ const Day = (props) => {
       >
         <div className="dayNumber">
           {
-            props.day == null ?
+            props.day === null ?
                 null
               : props.day.date.getDate()
           }

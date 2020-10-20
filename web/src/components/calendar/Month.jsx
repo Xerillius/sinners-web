@@ -106,6 +106,14 @@ const Month = (props) => {
     return monthWeeks
   }
 
+  const submitSelected = () => {
+    let data = {}
+    selected.forEach(event => {
+      data[event.event.id] = event.status
+    })
+    console.log(data)
+  }
+
   useEffect(() => {
     if(month === null){
       setMonth(constructMonth(props.year,props.month))
@@ -132,12 +140,24 @@ const Month = (props) => {
         }
       </div>
       <div className="signups">
+        <div className="signupTags">
+          <span className="eventLoc">Location</span>
+          <span className="eventDate">Date</span>
+          <div className="signupButtons">Status Buttons</div>
+          <div className="textfield">Notes</div>
+        </div>
+        <hr />
         {
           selected.map((event,i) => {
             return <EventSignup event={event} key={i} />
           })
         }
       </div>
+      <button
+        onClick={submitSelected}
+      >
+        Submit
+      </button>
     </MonthContext.Provider>
   )
 }

@@ -117,11 +117,19 @@ body {
 }
 
 .signups {
-  width: 70%;
+  width: 1074px;
   margin: 20px auto;
   color: $warning;
   display: flex;
   flex-direction: column;
+  hr {
+    width: 100%;
+  }
+  .signupTags {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+  }
   .eventSignup {
     margin: 5px 0px 5px 0px;
     background-color: #222;
@@ -132,10 +140,13 @@ body {
   }
   .eventLoc {
     width: 15%;
+    margin-left: 5px;
+    text-align: left;
   }
   .eventDate {
     width: 5%;
   }
+
   .signupButtons {
     width: 30%;
     display: flex;
@@ -145,6 +156,10 @@ body {
       border-radius: 10px;
       color: black;
       background-color: #888;
+      &.selected {
+        background-color: pink;
+        outline: none;
+      }
     }
   }
   textarea {

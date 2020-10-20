@@ -12,9 +12,19 @@ class Event {
   constructor(event) {
     this.event = event
     this.selected = false
+    this.status = null
   }
   toggleSelected = () => {
     this.selected = !this.selected
+  }
+  setSignUp = () => {
+    this.status = "signup"
+  }
+  setTentative = () => {
+    this.status = "tentative"
+  }
+  setDeclined = () => {
+    this.status = "declined"
   }
 }
 
