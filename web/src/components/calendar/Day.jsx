@@ -1,7 +1,10 @@
-import React from 'react'
+import React, { useContext } from 'react'
+import { Link } from 'react-router-dom'
 import EventButton from './EventButton'
+import {UserContext} from '../../context/UserContext'
 
 const Day = (props) => {
+  const {user} = useContext(UserContext)
   const current = new Date()
   return (
     <>
@@ -18,7 +21,21 @@ const Day = (props) => {
           {
             props.day === null ?
                 null
-              : props.day.date.getDate()
+              : user.createEvent ?
+                    <Link 
+                      to={{
+                        pathname: '/createEvent',
+                        data: {
+                          year: props.day.date.getFullYear(),
+                          month: props.day.date.getMonth() + 1,
+                          day: props.day.date.getDate(),
+                          weekDayNum: props.day.date.getDay()
+                        }
+                      }}
+                    >
+                      {props.day.date.getDate()}
+                    </Link>
+                  : props.day.date.getDate()
           }
         </div>
         <div className="event-wrapper">

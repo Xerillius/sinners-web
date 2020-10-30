@@ -1,16 +1,24 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
+import { useHistory } from 'react-router-dom'
+import {axiosWithAuth} from '../axiosWithAuth/axiosWithAuth'
+import {MonthContext} from '../../context/MonthContext'
+import {UserContext} from '../../context/UserContext'
 
+import GateKeeper from '../gatekeeper/GateKeeper'
 import Week from './Week'
 import DayObj from './dayObj'
-import EventSignup from './EventSignup'
-import {events} from '../../data/events'
-import {MonthContext} from '../../context/MonthContext'
+import Event from './Event'
 
 const Month = (props) => {
+  const [currMoYr, setCurrMoYr] = useState({
+    month: props.month,
+    year: props.year
+  })
   const [month, setMonth] = useState(null)
   const [selected, setSelected] = useState([])
-  const selectRef = useRef(selected)
-  selectRef.current = selected
+  const [sorted, setSorted] = useState(null)
+  const {user, setUser} = useContext(UserContext)
+  const history = useHistory()
 
   const months = {
     0: "January",
@@ -52,18 +60,17 @@ const Month = (props) => {
     "Saturday"
   ]
 
-  const constructMonth = (yr, mo) => {
+  const constructMonth = async (yr, mo, events) => {
     // Get events for month
     let monthEvents = {}
-    events.forEach(event => {
-      let eventMonth = event.eventStartDate.split('-')[0] - 1
-      let eventDay = event.eventStartDate.split('-')[1]
-      if(eventMonth === props.month){
-        if(!monthEvents[eventDay]){
-          monthEvents[eventDay] = []
-        }
-        monthEvents[eventDay].push(event)
+    events.map(event => {
+      let eventDate = String(event.eventDate).split("")
+      eventDate = eventDate.slice(2,-4)
+      const eventDay = Number(eventDate.join(""))
+      if(!monthEvents[eventDay]){
+        monthEvents[eventDay] = []
       }
+      monthEvents[eventDay].push(event)
     })
 
     // Fill an array with all days of the month
@@ -94,7 +101,10 @@ const Month = (props) => {
       let week = Array(7).fill(null)
       // Rotate through the week
       while(dayControl < 7){
-        week[dayControl] = days.shift()
+        let temp = days.shift()
+        if(temp != undefined){
+          week[dayControl] = temp
+        }
         dayControl++
       }
       // Add week to month
@@ -106,59 +116,132 @@ const Month = (props) => {
     return monthWeeks
   }
 
-  const submitSelected = () => {
-    let data = {}
-    selected.forEach(event => {
-      data[event.event.id] = event.status
-    })
-    console.log(data)
+  // Function to change viewed month
+  const changeMonth = (forward) => {
+    if(forward){
+      if(currMoYr.month == 11){
+        setCurrMoYr({month: 0, year: currMoYr.year + 1})
+      } else {
+        setCurrMoYr({...currMoYr, month: currMoYr.month + 1})
+      }
+    } else {
+      if(currMoYr.month == 0){
+        setCurrMoYr({month: 11, year: currMoYr.year - 1})
+      } else {
+        setCurrMoYr({...currMoYr, month: currMoYr.month - 1})
+      }
+    }
   }
 
   useEffect(() => {
-    if(month === null){
-      setMonth(constructMonth(props.year,props.month))
+    if(!user){
+      const token = GateKeeper()
+      if(token){
+        setUser({
+          token: localStorage.getItem('token'),
+          id: token.id,
+          username: token.username,
+          approved: token.approved,
+          createEvent: token.createEvent
+        })
+      }
     }
   }, [])
 
+  useEffect(() => {
+    axiosWithAuth()
+      .get(`/events/month/${currMoYr.month+1}`)
+      .then(async res => {
+        const tempMonth = await constructMonth(props.year,props.month,res.data)
+        setMonth(tempMonth)
+      })
+      .catch(err => {
+        console.log(err)
+      })
+    axiosWithAuth()
+      .get(`/events/user/${user.id}`)
+      .then(res => {
+        setSelected(res.data)
+      })
+      .catch(err => {
+        console.log(err)
+      })
+  }, [user])
+
+  useEffect(() => {
+    axiosWithAuth()
+      .get(`/events/month/${currMoYr.month+1}`)
+      .then(async res => {
+        const tempMonth = await constructMonth(currMoYr.year,currMoYr.month,res.data)
+        setMonth(tempMonth)
+      })
+      .catch(err => {
+        console.log(err)
+      })
+  }, [currMoYr])
+
+  useEffect(() => {
+    let sortedSignups = selected.map(item => {return item})
+    sortedSignups.sort(function(a,b) {
+      if(a != null && b != null){
+        return a.eventMonth - b.eventMonth || a.eventDay - b.eventDay
+      }
+    })
+    setSorted(sortedSignups)
+  }, [selected])
+
   return (
-    <MonthContext.Provider value={{month, selected, setSelected, selectRef}}>
-      <div className="month">
-        <h1>{months[props.month]} - {props.year}</h1>
-        <div className="week">
+    <>
+      { user && user.approved === true ?
+        <MonthContext.Provider value={{month, selected, setSelected}}>
+          {/** CALENDAR RENDER*/}
+          <div className="month">
+            <h1>
+              <button 
+                onClick={() => {changeMonth(false)}}
+              >
+                Prev
+              </button> :: {months[currMoYr.month]} - {currMoYr.year} :: <button
+                onClick={() => {changeMonth(true)}}
+              >Next</button>
+            </h1>
+            <div className="week">
+              {
+                weekDays.map((day,i) => {
+                  return <span className="day" key={i}>{day}</span>
+                })
+              }
+            </div>
+            {
+              month === null ? null : month.map((week,i) => {
+                return (
+                  <Week week={week} key={i} weekNum={i} />
+                )
+              })
+            }
+          </div>
+          {/** MY UPCOMING EVENTS */}
           {
-            weekDays.map((day,i) => {
-              return <span className="day" key={i}>{day}</span>
-            })
+            sorted != null ?
+              <>
+                <h3>My upcoming raids</h3>
+                <div className="upcoming_event">
+                  <span>Location</span>
+                  <span>Date</span>
+                  <span>Time</span>
+                </div>
+                {
+                  sorted.map(event => {
+                    return <Event data={event} />
+                  })
+                }
+              </>
+            : null
           }
-        </div>
-        {
-          month == null ? null : month.map((week,i) => {
-            return (
-              <Week week={week} key={i} weekNum={i} />
-            )
-          })
-        }
-      </div>
-      <div className="signups">
-        <div className="signupTags">
-          <span className="eventLoc">Location</span>
-          <span className="eventDate">Date</span>
-          <div className="signupButtons">Status Buttons</div>
-          <div className="textfield">Notes</div>
-        </div>
-        <hr />
-        {
-          selected.map((event,i) => {
-            return <EventSignup event={event} key={i} />
-          })
-        }
-      </div>
-      <button
-        onClick={submitSelected}
-      >
-        Submit
-      </button>
-    </MonthContext.Provider>
+        </MonthContext.Provider>
+      : () => {history.push('/login')}
+      }
+    </>
   )
 }
 
