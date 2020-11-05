@@ -111,7 +111,10 @@ const CreateEvent = (props) => {
     const createDay = day.getDate()
     const createMonth = day.getMonth()
     const createYear = day.getFullYear()
-    const eventDate = Number((String(m)+String(d)+String(y)))
+    if(String(d).length == 1){
+      d = "0" + String(d)
+    }
+    const eventDate = Number((String(y)+String(m)+String(d)))
     const time = event.eventHour + ":" + event.eventMinutes + event.eventAMPM
     const max = event.eventType == "Raid-20" ? 20 : 40
     const eventData = {
@@ -123,15 +126,15 @@ const CreateEvent = (props) => {
       eventCreateDate: String(createMonth+1) + "-" + String(createDay) + "-" + String(createYear)
     }
     console.log(eventData)
-    axiosWithAuth()
-      .post('/events/new', eventData)
-      .then(res => {
-        console.log(res)
-        history.push('/calendar')
-      })
-      .catch(err => {
-        console.log(err)
-      })
+    // axiosWithAuth()
+    //   .post('/events/new', eventData)
+    //   .then(res => {
+    //     console.log(res)
+    //     history.push('/calendar')
+    //   })
+    //   .catch(err => {
+    //     console.log(err)
+    //   })
   }
 
   const genRecurEvents = () => {
